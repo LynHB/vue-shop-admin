@@ -1,0 +1,9 @@
+/**
+    全局样式表
+    入口文件需要导入该样式
+*/
+html, body, #app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}

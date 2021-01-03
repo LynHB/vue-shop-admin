@@ -17,6 +17,15 @@ Vue.config.productionTip = false
 axios.defaults.baseURL = 'https://www.liulongbin.top:8888/api/private/v1/'
 Vue.prototype.$http = axios
 
+// axios请求拦截
+axios.interceptors.request.use(config => {
+  if(window.sessionStorage.getItem('token')===null){
+    return config
+  }
+  config.headers.authorization = window.sessionStorage.getItem('token')
+  return config
+})
+
 new Vue({
   router,
   render: h => h(App)

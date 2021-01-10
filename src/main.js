@@ -19,7 +19,7 @@ Vue.prototype.$http = axios
 
 // axios请求拦截
 axios.interceptors.request.use(config => {
-  if(window.sessionStorage.getItem('token')===null){
+  if (window.sessionStorage.getItem('token') === null) {
     return config
   }
   config.headers.authorization = window.sessionStorage.getItem('token')

@@ -32,9 +32,9 @@
           </template>
         </el-table-column>
         <el-table-column label="操作" width="180px">
-          <template >
+          <template slot-scope="scope">
             <el-button type="primary" icon="el-icon-edit" size="mini"></el-button>
-            <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
+            <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteUser(scope.row.id)"></el-button>
             <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable="false">
               <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
             </el-tooltip>
@@ -57,7 +57,7 @@
     <!--添加用户-->
     <el-dialog
       title="添加用户"
-      :visible.sync="dialogVisible"
+      :visible.sync="dialogVisible" @close="dialogClosed"
       width="50%">
       <el-form ref="formRef" :model="form" :rules="formRules" label-width="70px">
         <el-form-item label="用户名" prop="username">
@@ -72,13 +72,10 @@
         <el-form-item label="电话" prop="mobile">
           <el-input v-model="form.mobile"></el-input>
         </el-form-item>
-        <el-form-item label="角色" prop="role_name">
-          <el-input v-model="form.role_name"></el-input>
-        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="addUser">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -97,7 +94,12 @@ export default {
       userList: [],
       total: 0,
       dialogVisible: false,
-      form: {},
+      form: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
       formRules: {
         username: [
           { required: true, message: '请输入用户名称', trigger: 'blur' },
@@ -115,7 +117,7 @@ export default {
         params: this.queryInfo
       })
       if (res.meta.status !== 200) {
-        return this.$message.error('获取列表失败')
+        return this.$message.error(res.meta.msg)
       }
       this.userList = res.data.users
       this.total = res.data.total
@@ -136,6 +138,41 @@ export default {
         return this.$message.error('更新用户状态失败')
       }
       return this.$message.success('更新用户状态成功')
+    },
+    dialogClosed() {
+      this.$refs.formRef.resetFields()
+    },
+    async addUser() {
+      this.$refs.formRef.validate(async valid => {
+        if (!valid) return
+        const { data: res } = await this.$http.post('users', this.form)
+        if (res.meta.status !== 201) {
+          return this.$message.error('创建用户失败')
+        }
+        this.dialogVisible = false
+        this.$refs.formRef.resetFields()
+        return this.$message.success('创建用户成功')
+      })
+    },
+    deleteUser(id) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+
+      // 用户确认删除返回confirm字符串
+      // 用户取消删除返回cancel字符串
     }
   }
 }
